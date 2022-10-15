@@ -25,7 +25,7 @@ static const uint8_t buf_len = 20;
 static const int led_pin = LED_BUILTIN;
 
 // Globals
-static int led_delay = 500;   // ms
+static long int led_delay = 500;   // ms
 //*****************************************************************************
 // Tasks
 
@@ -44,10 +44,8 @@ void toggleLED(void *parameter) {
 // it with atoi() in case you're doing this in a non-Arduino environment. You'd
 // also need to replace Serial with your own UART code for non-Arduino.
 void readSerial(void *parameters) {
-
   //Loop Forever
   while (1) {
-
     // Read characters from serial
     if (Serial.available() > 0) {
       led_delay = Serial.parseInt();
@@ -75,7 +73,7 @@ void setup() {
             "Toggle LED",   // Name of task
             1024,           // Stack size (bytes in ESP32, words in FreeRTOS)
             NULL,           // Parameter to pass
-            1,              // Task priority
+            2,              // Task priority
             NULL,           // Task handle
             app_cpu);       // Run on one core for demo purposes (ESP32 only)
             
