@@ -1,3 +1,9 @@
+/*Author: Julio Cesar Eduardo de Souza
+Date: 15/10/2022
+Task: Blink the LED in port 2 with two different Tasks
+      The output makes the LED blink in two frequencies.
+*/
+
 // Use only core 1 for demo purpose
 #if CONFIG_FREERTOS_UNICORE
   static const BaseType_t app_cpu = 0;
