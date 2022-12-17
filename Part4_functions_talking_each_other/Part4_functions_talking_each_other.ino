@@ -36,9 +36,7 @@ void writeSerial(void *parameter) {
  while(1){    
     Serial.print(teststr);
     vTaskSuspend(TaskHandle_1);
-    ChangeInfo = 0;
-  
-   
+    ChangeInfo = 0;   
  }
 }
 
