@@ -34,10 +34,19 @@ String Message_received = String(50);
 static QueueHandle_t msg_queue1;
 static QueueHandle_t msg_queue2;
 
-
+//____________Functions_____________//
+int get_delay_task_b(String message_terminal){
+  char *delay_time;
+  int str_len = Message_received.length() + 1; 
+  char Message_char_received[str_len];
+  Message_received.toCharArray(Message_char_received, str_len);
+  delay_time = strtok(Message_char_received," ");
+  delay_time = strtok(NULL," ");
+  return atoi(delay_time);
+}
 //_____________Tasks_______________//
 void task_a_eccho_message(void *parameters){
-  int delay_time = 0;
+  int delay_task_b = 0;
   while (1) {
 
     // Read characters from serial
@@ -45,9 +54,8 @@ void task_a_eccho_message(void *parameters){
       Message_received = Serial.readString();
       Serial.println(Message_received);
       if(memcmp(&Message_received, command, cmd_len) == 0){
-        //Send delay to queue1
-        delay_time = Serial.parseInt();
-        Serial.println(Message_received[6]);
+        delay_task_b = get_delay_task_b(Message_received);
+        // TO-DO Send the int value to the queue 
       }
     }
   }
