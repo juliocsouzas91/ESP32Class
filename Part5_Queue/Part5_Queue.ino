@@ -21,11 +21,13 @@ Task B{
 #else
   static const BaseType_t app_cpu = 1;
 #endif
+
 //_____________Settings______________//
 static const uint8_t msg_queue_len = 5;
 static const char command[] = "delay ";
 uint8_t cmd_len = strlen(command);
 char buffer[80];
+
 //_____________Pins_________________//
 const int led_pin = 2;
 
@@ -47,6 +49,7 @@ int get_delay_task_b(String message_terminal){
 //_____________Tasks_______________//
 void task_a_eccho_message(void *parameters){
   int delay_task_b = 0;
+  String info_queue2;
   while (1) {
 
     // Read characters from serial
@@ -55,8 +58,14 @@ void task_a_eccho_message(void *parameters){
       Serial.println(Message_received);
       if(memcmp(&Message_received, command, cmd_len) == 0){
         delay_task_b = get_delay_task_b(Message_received);
-        // TO-DO Send the int value to the queue 
+        if (xQueueSend(msg_queue1, (void *) &delay_task_b, 10)!= pdTRUE){
+          Serial.println("Queue full");
+        }     
       }
+    }
+
+    if(xQueueReceive(msg_queue2, (void *) &info_queue2, 0) == pdTRUE){
+        Serial.println(info_queue2);
     }
   }
 }
@@ -64,7 +73,12 @@ void task_a_eccho_message(void *parameters){
 void task_b_blink_led(void *parameters){
   int time_delay = 1000;
   int number_blinks = 0;
+  String info_queue2 = "Blinked";
   while(1){
+    if(xQueueReceive(msg_queue1, (void *) &time_delay, 0) == pdTRUE){
+      Serial.println("Delay Atualizado \n");
+      Serial.println(time_delay);
+    }
     //check if queue 2 has new values, update time_dalay function
     digitalWrite(led_pin,HIGH);
     vTaskDelay(int(time_delay/2)/portTICK_PERIOD_MS);
@@ -73,7 +87,11 @@ void task_b_blink_led(void *parameters){
     number_blinks++;
     if(number_blinks>100){
       number_blinks = 0;
-      //Send "blinked" to Queue2
+      if (xQueueSend(msg_queue2, (void *) &info_queue2, 10)!= pdTRUE){
+      }
+      else{   
+        Serial.println("Mesage Sent");
+      }     
     }    
     }
 }
@@ -81,10 +99,10 @@ void task_b_blink_led(void *parameters){
 void setup() {
   Serial.begin(9600);
   Serial.println("Inicalizando o programa\n");
-  
+  pinMode(led_pin, OUTPUT);
   // Create queue
   msg_queue1 = xQueueCreate(msg_queue_len, sizeof(int));  
-  msg_queue2 = xQueueCreate(msg_queue_len, sizeof(int));  
+  msg_queue2 = xQueueCreate(msg_queue_len, sizeof(String));  
   
   //Declaring Tasks
   xTaskCreatePinnedToCore(      //Use xTaskCreate() in vanilla FreeRTOS
